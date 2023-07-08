@@ -13,6 +13,7 @@ import synthesyzer.termination.data.death.DeathTracker;
 import synthesyzer.termination.data.team.TeamData;
 import synthesyzer.termination.data.team.TeamDataManager;
 import synthesyzer.termination.util.Messenger;
+import synthesyzer.termination.util.PhaseManager;
 
 public class ServerTickEvent {
 
@@ -23,6 +24,8 @@ public class ServerTickEvent {
             if (world == null) {
                 return;
             }
+
+            PhaseManager.tick(world);
 
             if (Termination.CONFIG.playerDeathCooldown() > 0) {
                 handleDeathTracking(world);

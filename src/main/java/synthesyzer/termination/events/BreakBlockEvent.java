@@ -8,13 +8,13 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import synthesyzer.termination.Termination;
-import synthesyzer.termination.command.EnableNucleusBreakingCommand;
 import synthesyzer.termination.data.team.TeamDataManager;
 import synthesyzer.termination.network.TMNetwork;
 import synthesyzer.termination.network.packets.servertoclient.BreakNucleusPacket;
 import synthesyzer.termination.network.packets.servertoclient.UpdateTeamDataPacket;
 import synthesyzer.termination.registry.blocks.TMBlocks;
 import synthesyzer.termination.util.Messenger;
+import synthesyzer.termination.util.PhaseManager;
 
 public class BreakBlockEvent {
     public static void register() {
@@ -64,7 +64,7 @@ public class BreakBlockEvent {
                 return false;
             }
 
-            if (!EnableNucleusBreakingCommand.EnableNucleusBreaking) {
+            if (!PhaseManager.isPhase2()) {
                 Messenger.sendError(player, "Can't break nucleus during starting phase");
                 return false;
             }
