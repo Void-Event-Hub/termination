@@ -9,7 +9,7 @@ public class TMCommands {
         Termination.LOGGER.info("Registering commands");
         CommandRegistrationCallback.EVENT.register(CreateTeamCommand::register);
         CommandRegistrationCallback.EVENT.register(SetSpawnCommand::register);
-        CommandRegistrationCallback.EVENT.register(EnableNucleusBreakingCommand::register);
+        CommandRegistrationCallback.EVENT.register(StartEventCommand::register);
     }
 
 }
