@@ -3,7 +3,6 @@ package synthesyzer.termination.events;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.scoreboard.AbstractTeam;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
@@ -89,13 +88,7 @@ public class ServerTickEvent {
 
     private static BlockPos getPlayerSpawn(ServerPlayerEntity player) {
         var teamManager = TeamDataManager.get(player.world);
-        AbstractTeam team = player.getScoreboardTeam();
-
-        if (team == null) {
-            return player.getSpawnPointPosition();
-        }
-
-        var teamData = teamManager.getTeamData(team.getName());
+        var teamData = teamManager.getTeamData(player.getScoreboardTeam());
 
         if (teamData.isEmpty()) {
             return player.getSpawnPointPosition();
@@ -106,13 +99,7 @@ public class ServerTickEvent {
 
     private static void boostPlayersInBase(ServerPlayerEntity player) {
         var teamManager = TeamDataManager.get(player.world);
-        AbstractTeam team = player.getScoreboardTeam();
-
-        if (team == null) {
-            return;
-        }
-
-        var data = teamManager.getTeamData(team.getName());
+        var data = teamManager.getTeamData(player.getScoreboardTeam());
 
         if (data.isEmpty()) {
             Termination.LOGGER.info("Team data is empty");
@@ -144,13 +131,7 @@ public class ServerTickEvent {
         TeamDataManager teamDataManager = TeamDataManager.get(world);
 
         world.getPlayers().forEach(player -> {
-            AbstractTeam team = player.getScoreboardTeam();
-
-            if (team == null) {
-                return;
-            }
-
-            var teamData = teamDataManager.getTeamData(team.getName());
+            var teamData = teamDataManager.getTeamData(player.getScoreboardTeam());
 
             if (teamData.isEmpty()) {
                 return;

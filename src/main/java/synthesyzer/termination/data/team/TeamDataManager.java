@@ -3,10 +3,12 @@ package synthesyzer.termination.data.team;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.scoreboard.AbstractTeam;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.PersistentState;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Optional;
@@ -61,6 +63,18 @@ public class TeamDataManager extends PersistentState {
     }
 
     /**
+     * @param team the team to get the team data from
+     * @return the team data of that team
+     */
+    public Optional<TeamData> getTeamData(@Nullable AbstractTeam team) {
+        if (team == null) {
+            return Optional.empty();
+        }
+
+        return getTeamData(team.getName());
+    }
+
+    /**
      * @return map with all team data where the key is the name of the team,
      * which is the same as the scoreboard team name coupled to this teamData
      */
@@ -82,7 +96,7 @@ public class TeamDataManager extends PersistentState {
 
     /**
      * Writes all team data to a compound tag
-     * @param nbt
+     * @param nbt the compound tag to write the team data to
      * @return the compound tag containing all team data
      */
     @Override
