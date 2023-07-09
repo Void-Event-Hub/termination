@@ -137,4 +137,14 @@ public class TeamData {
 
         return false;
     }
+
+    @Override
+    public String toString() {
+        return "TeamData{" +
+                "name='" + name + '\'' +
+                ", health=" + health +
+                ", spawn=" + spawn +
+                ", nucleus=" + nucleus +
+                '}';
+    }
 }
