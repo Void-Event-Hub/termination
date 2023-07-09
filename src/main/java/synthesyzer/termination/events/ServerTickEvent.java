@@ -15,8 +15,11 @@ import synthesyzer.termination.data.team.TeamData;
 import synthesyzer.termination.data.team.TeamDataManager;
 import synthesyzer.termination.util.Messenger;
 import synthesyzer.termination.util.PhaseManager;
+import synthesyzer.termination.util.Time;
 
 public class ServerTickEvent {
+
+    private static int ticks = 0;
 
     public static void register() {
         ServerTickEvents.END_SERVER_TICK.register(server -> {
@@ -24,6 +27,12 @@ public class ServerTickEvent {
 
             if (world == null) {
                 return;
+            }
+
+            ticks++;
+
+            if (ticks % (5 * Time.TICKS_PER_SECOND) == 0) {
+                addEffectToDeadTeamsMembers(world);
             }
 
             if (StartEventCommand.startedEvent()) {
@@ -120,6 +129,28 @@ public class ServerTickEvent {
         }
 
         player.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, 30, 0));
+    }
+
+    private static void addEffectToDeadTeamsMembers(ServerWorld world) {
+        TeamDataManager teamDataManager = TeamDataManager.get(world);
+
+        world.getPlayers().forEach(player -> {
+            AbstractTeam team = player.getScoreboardTeam();
+
+            if (team == null) {
+                return;
+            }
+
+            var teamData = teamDataManager.getTeamData(team.getName());
+
+            if (teamData.isEmpty()) {
+                return;
+            }
+
+            if (teamData.get().isDead()) {
+                player.addStatusEffect(new StatusEffectInstance(StatusEffects.GLOWING, 999_999, 0));
+            }
+        });
     }
 
 }
