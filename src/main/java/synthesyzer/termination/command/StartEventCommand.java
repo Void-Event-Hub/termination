@@ -12,12 +12,15 @@ public class StartEventCommand {
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess commandRegistryAccess, CommandManager.RegistrationEnvironment registrationEnvironment) {
         dispatcher.register(CommandManager.literal("startevent").requires(source -> source.hasPermissionLevel(3))
-                .then(CommandManager.literal("togglenucleusbreak").executes(context -> {
-                    startEvent = true;
-                    context.getSource().sendFeedback(Text.of("Started Termination Event!"), true);
-                    return 1;
-                }))
-        );
+            .executes(context -> {
+                if (startEvent) {
+                    context.getSource().sendFeedback(Text.of("Termination Event already started!"), true);
+                    return 0;
+                }
+                startEvent = true;
+                context.getSource().sendFeedback(Text.of("Started Termination Event!"), true);
+                return 1;
+            }));
     }
 
     public static boolean startedEvent() {

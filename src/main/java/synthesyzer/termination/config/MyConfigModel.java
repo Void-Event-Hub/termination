@@ -18,6 +18,6 @@ public class MyConfigModel {
     public double chanceToDropItemOnDeath = 0.4;
     public double damageDealtToToolsOnDeath = 0.1;
     public int minutesUntilPhase2 = 60;
-    public int minutesUntilEndPhase = 1;
+    public int minutesUntilEndPhase = 120;
 }
 

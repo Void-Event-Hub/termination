@@ -9,6 +9,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.GameMode;
 import synthesyzer.termination.Termination;
+import synthesyzer.termination.command.StartEventCommand;
 import synthesyzer.termination.data.death.DeathTracker;
 import synthesyzer.termination.data.team.TeamData;
 import synthesyzer.termination.data.team.TeamDataManager;
@@ -25,7 +26,9 @@ public class ServerTickEvent {
                 return;
             }
 
-            PhaseManager.tick(world);
+            if (StartEventCommand.startedEvent()) {
+                PhaseManager.tick(world);
+            }
 
             if (Termination.CONFIG.playerDeathCooldown() > 0) {
                 handleDeathTracking(world);

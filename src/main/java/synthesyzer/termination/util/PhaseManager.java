@@ -2,6 +2,7 @@ package synthesyzer.termination.util;
 
 import net.minecraft.network.packet.s2c.play.SubtitleS2CPacket;
 import net.minecraft.network.packet.s2c.play.TitleS2CPacket;
+import net.minecraft.scoreboard.AbstractTeam;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
@@ -47,6 +48,10 @@ public class PhaseManager {
         announcePhase2Timers(world);
         announceEndPhaseTimers(world);
 
+        if (ticks == 1) {
+            startPhase1(world);
+        }
+
         if (!startedPhase2 && isPhase2()) {
             startedPhase2 = true;
             startPhase2(world);
@@ -75,11 +80,47 @@ public class PhaseManager {
         return isPhase(Termination.CONFIG.minutesUntilEndPhase());
     }
 
+    private static void startPhase1(ServerWorld world) {
+        var teamManager = TeamDataManager.get(world);
+
+        world.getPlayers().forEach(player -> {
+            AbstractTeam team = player.getScoreboardTeam();
+
+            if (team == null) {
+                Messenger.sendMessage(player, "Looks like you are not in a team. Please contact a staff member to get you in a team!");
+                return;
+            }
+
+            var teamData = teamManager.getTeamData(team.getName());
+
+            if (teamData.isEmpty()) {
+                Messenger.sendMessage(player, "Looks like something went wrong. Please contact a staff member! (No Team Data Error)");
+                return;
+            }
+
+            var spawn = teamData.get().getSpawn();
+
+            if (spawn.isEmpty()) {
+                Messenger.sendMessage(player, "Looks like something went wrong. Please contact a staff member! (No Spawn Error)");
+                return;
+            }
+
+            player.teleport(world, spawn.get().getX(), spawn.get().getY(), spawn.get().getZ(), player.getYaw(), player.getPitch());
+            sendTitle(player, "Phase 1", "The Termination Event has begun!");
+            player.playSound(SoundEvents.ENTITY_ENDER_DRAGON_GROWL, SoundCategory.MASTER, 1, 1);
+            Messenger.sendMessage(player, "Phase 1 of the Termination event has begun! You are not able to attack other's nuclei yet, So focus on gathering resources and preparing for phase 2!");
+            Messenger.sendMessage(player, "You will be able to attack other's nuclei in Phase 2 in " + (ticksUntilPhase2() / Time.TICKS_PER_MINUTE) + " minutes!");
+            Messenger.sendMessage(player, "All nuclei will fall in the Final Phase in " + (ticksUntilEndPhase() / Time.TICKS_PER_MINUTE) + " minutes!");
+
+        });
+    }
+
     private static void startPhase2(ServerWorld world) {
         world.getPlayers().forEach(player -> {
             sendTitle(player, "Phase 2", "The Nucleus is now vulnerable!");
             player.playSound(SoundEvents.ENTITY_ENDER_DRAGON_GROWL, SoundCategory.MASTER, 1, 1);
             Messenger.sendMessage(player, "Phase 2 has begun! You can now attack other teams' Nuclei! Be careful, though, as your Nucleus is now vulnerable as well!");
+            Messenger.sendMessage(player, "The End Phase will start in " + (ticksUntilEndPhase() / Time.TICKS_PER_MINUTE) + " minutes!");
         });
     }
 
