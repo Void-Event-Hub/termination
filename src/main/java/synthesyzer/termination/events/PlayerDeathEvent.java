@@ -7,6 +7,8 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.GameMode;
 import synthesyzer.termination.Termination;
 import synthesyzer.termination.data.death.DeathTracker;
+import synthesyzer.termination.data.kills.MultiKill;
+import synthesyzer.termination.data.kills.MultiKillManager;
 import synthesyzer.termination.util.Messenger;
 
 public class PlayerDeathEvent {
@@ -24,6 +26,7 @@ public class PlayerDeathEvent {
                 if (source.getSource() instanceof ServerPlayerEntity killer) {
                     if (killer.getScoreboardTeam() != team) {
                         awardKiller(killer);
+                        announceKill(killer, player);
                     }
                 }
 
@@ -71,6 +74,16 @@ public class PlayerDeathEvent {
 //                slot.set(ItemStack.EMPTY);
 //            }
 //        });
+    }
+
+    private static void announceKill(ServerPlayerEntity killer, ServerPlayerEntity killed) {
+        ServerWorld world = killer.getWorld();
+        MultiKill multiKill = MultiKillManager.addKill(killer.getGameProfile().getId(), ServerTickEvent.getCurrentTick());
+
+        String multiKillTitle = multiKill == MultiKill.SINGLE_KILL ? "" : "[" + multiKill.getTitle() + "] ";
+        String message = multiKillTitle + killer.getDisplayName().getString() + " has killed " + killed.getDisplayName().getString() + "!";
+
+        world.getPlayers().forEach(player -> Messenger.sendMessage(player, message));
     }
 
     private static void awardKiller(ServerPlayerEntity killer) {

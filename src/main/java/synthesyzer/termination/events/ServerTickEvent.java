@@ -50,6 +50,14 @@ public class ServerTickEvent {
         });
     }
 
+    /**
+     * Gets the current tick of the server.
+     * @return the current tick of the server.
+     */
+    public static int getCurrentTick() {
+        return ticks;
+    }
+
     private static void handleDeathTracking(ServerWorld world) {
         DeathTracker deathTracker = DeathTracker.get(world);
         deathTracker.update();
@@ -102,7 +110,6 @@ public class ServerTickEvent {
         var data = teamManager.getTeamData(player.getScoreboardTeam());
 
         if (data.isEmpty()) {
-            Termination.LOGGER.info("Team data is empty");
             return;
         }
 
