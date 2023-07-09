@@ -91,8 +91,13 @@ public class ServerTickEvent {
             return player.getSpawnPointPosition();
         }
 
-        TeamData teamData = teamManager.getTeamData(team.getName()).get();
-        return teamData.getSpawn().orElse(player.world.getSpawnPos());
+        var teamData = teamManager.getTeamData(team.getName());
+
+        if (teamData.isEmpty()) {
+            return player.getSpawnPointPosition();
+        }
+
+        return teamData.get().getSpawn().orElse(player.world.getSpawnPos());
     }
 
     private static void boostPlayersInBase(ServerPlayerEntity player) {
