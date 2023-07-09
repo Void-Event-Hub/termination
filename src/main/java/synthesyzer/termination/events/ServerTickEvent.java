@@ -32,8 +32,12 @@ public class ServerTickEvent {
             ticks++;
 
             if (ticks % (Time.TICKS_PER_SECOND) == 0) {
-                addEffectToDeadTeamsMembers(world);
                 world.getPlayers().forEach(ServerTickEvent::boostPlayersInBase);
+
+                if (PhaseManager.isEndPhase()) {
+                    addEffectsToPlayersInTeam(world);
+                }
+
             }
 
             if (StartEventCommand.startedEvent()) {
@@ -136,7 +140,7 @@ public class ServerTickEvent {
         player.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, 30, 0));
     }
 
-    private static void addEffectToDeadTeamsMembers(ServerWorld world) {
+    private static void addEffectsToPlayersInTeam(ServerWorld world) {
         TeamDataManager teamDataManager = TeamDataManager.get(world);
 
         world.getPlayers().forEach(player -> {
@@ -152,9 +156,7 @@ public class ServerTickEvent {
                 return;
             }
 
-            if (teamData.get().isDead()) {
-                player.addStatusEffect(new StatusEffectInstance(StatusEffects.GLOWING, 999_999, 0));
-            }
+            player.addStatusEffect(new StatusEffectInstance(StatusEffects.GLOWING, 999_999, 0));
         });
     }
 
