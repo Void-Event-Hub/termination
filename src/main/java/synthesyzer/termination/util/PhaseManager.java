@@ -16,6 +16,7 @@ import synthesyzer.termination.network.packets.servertoclient.UpdateTeamDataPack
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class PhaseManager {
 
@@ -91,7 +92,7 @@ public class PhaseManager {
                 return;
             }
 
-            var teamData = teamManager.getTeamData(team.getName());
+            Optional<TeamData> teamData = teamManager.getTeamData(team.getName());
 
             if (teamData.isEmpty()) {
                 Messenger.sendMessage(player, "Looks like something went wrong. Please contact a staff member! (No Team Data Error)");

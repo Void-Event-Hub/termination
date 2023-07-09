@@ -55,6 +55,7 @@ public class PlayerDeathEvent {
             return;
         }
 
+
 //        player.inventoryMenu.slots.forEach(slot -> {
 //            if (!slot.hasItem()) {
 //                return;
