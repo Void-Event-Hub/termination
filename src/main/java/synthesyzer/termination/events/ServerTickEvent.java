@@ -31,8 +31,9 @@ public class ServerTickEvent {
 
             ticks++;
 
-            if (ticks % (5 * Time.TICKS_PER_SECOND) == 0) {
+            if (ticks % (Time.TICKS_PER_SECOND) == 0) {
                 addEffectToDeadTeamsMembers(world);
+                world.getPlayers().forEach(ServerTickEvent::boostPlayersInBase);
             }
 
             if (StartEventCommand.startedEvent()) {
@@ -43,7 +44,6 @@ public class ServerTickEvent {
                 handleDeathTracking(world);
             }
 
-            world.getPlayers().forEach(ServerTickEvent::boostPlayersInBase);
         });
     }
 
