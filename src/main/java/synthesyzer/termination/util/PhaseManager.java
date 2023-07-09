@@ -24,9 +24,10 @@ public class PhaseManager {
 
     private static boolean startedPhase2 = false;
     private static boolean startedEndPhase = false;
+    private static boolean finishedGame = false;
 
-    private static HashMap<Integer, Boolean> phase2AnnouncedTimers = new HashMap<>();
-    private static HashMap<Integer, Boolean> endPhaseAnnouncedTimers = new HashMap<>();
+    private static final HashMap<Integer, Boolean> phase2AnnouncedTimers = new HashMap<>();
+    private static final HashMap<Integer, Boolean> endPhaseAnnouncedTimers = new HashMap<>();
 
     static {
         phase2AnnouncedTimers.put(30, false);
@@ -63,6 +64,11 @@ public class PhaseManager {
             startEndPhase(world);
         }
 
+        if (!finishedGame && isGameFinished(world)) {
+            finishedGame = true;
+            finishGame(world);
+        }
+
     }
 
     public static int ticksUntilPhase2() {
@@ -79,6 +85,10 @@ public class PhaseManager {
 
     public static boolean isEndPhase() {
         return isPhase(Termination.CONFIG.minutesUntilEndPhase());
+    }
+
+    public static boolean isGameFinished(ServerWorld world) {
+        return only1TeamOnline(world);
     }
 
     private static void startPhase1(ServerWorld world) {
@@ -140,6 +150,14 @@ public class PhaseManager {
         });
     }
 
+    private static void finishGame(ServerWorld world) {
+        world.getPlayers().forEach(player -> {
+            player.playSound(SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.MASTER, 1, 1);
+            sendTitle(player, "Winner", "You have won Termination!");
+            Messenger.sendMessage(player, "Termination has ended! You have won the game! Congratulations!");
+        });
+    }
+
     private static int ticksUntilPhase(int phaseMinutes) {
         return Math.max(phaseMinutes * Time.TICKS_PER_MINUTE - ticks, 0);
     }
@@ -187,6 +205,33 @@ public class PhaseManager {
     private static void sendTitle(ServerPlayerEntity player, String title, String subtitle) {
         player.networkHandler.sendPacket(new TitleS2CPacket(Text.of(title)));
         player.networkHandler.sendPacket(new SubtitleS2CPacket(Text.of(subtitle)));
+    }
+
+    private static boolean only1TeamOnline(ServerWorld world) {
+        AbstractTeam firstTeam = null;
+
+        for (ServerPlayerEntity player : world.getPlayers()) {
+            if (player.hasPermissionLevel(3)) {
+                continue;
+            }
+
+            AbstractTeam team = player.getScoreboardTeam();
+
+            if (team == null) {
+                continue;
+            }
+
+            if (firstTeam == null) {
+                firstTeam = team;
+                continue;
+            }
+
+            if (!firstTeam.equals(team)) {
+                return false;
+            }
+        }
+
+        return false;
     }
 
     private PhaseManager() {
