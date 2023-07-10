@@ -9,6 +9,8 @@ import synthesyzer.termination.Termination;
 import synthesyzer.termination.data.death.DeathTracker;
 import synthesyzer.termination.data.kills.MultiKill;
 import synthesyzer.termination.data.kills.MultiKillManager;
+import synthesyzer.termination.network.TMNetwork;
+import synthesyzer.termination.network.packets.servertoclient.PlayerKillPacket;
 import synthesyzer.termination.util.Messenger;
 
 public class PlayerDeathEvent {
@@ -79,7 +81,7 @@ public class PlayerDeathEvent {
     private static void announceKill(ServerPlayerEntity killer, ServerPlayerEntity killed) {
         ServerWorld world = killer.getWorld();
         MultiKill multiKill = MultiKillManager.addKill(killer.getGameProfile().getId(), ServerTickEvent.getCurrentTick());
-
+        TMNetwork.CHANNEL.serverHandle(killer).send(new PlayerKillPacket(multiKill, killed.getGameProfile().getName()));
         String multiKillTitle = multiKill == MultiKill.SINGLE_KILL ? "" : "[" + multiKill.getTitle() + "] ";
         String message = multiKillTitle + killer.getDisplayName().getString() + " has killed " + killed.getDisplayName().getString() + "!";
 

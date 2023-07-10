@@ -22,6 +22,7 @@ public class TerminationClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         HudRenderCallback.EVENT.register(TeamScoreboard::render);
+        ClientTickEvent.register();
 
         // Server cannot register clientbound packets, so we define the handler here
         TMNetwork.CHANNEL.registerClientbound(BreakNucleusPacket.class, ((message, access) -> {
@@ -49,7 +50,7 @@ public class TerminationClient implements ClientModInitializer {
 
             if (playerTeam.getName().equals(attackedTeam.getName())) {
                 player.playSound(SoundEvents.BLOCK_ANVIL_PLACE, 0.7F, 1.0F);
-                Messenger.sendClientMessage(player, "Your civilization is under attack! " +  "( " + attackedTeam.getHealth() + " )");
+                Messenger.sendClientMessage(player, "Your civilization is under attack! " + "( " + attackedTeam.getHealth() + " )");
             }
 
             if (playerTeam.getName().equals(attackingTeam.getName())) {

@@ -6,6 +6,7 @@ import net.minecraft.util.Identifier;
 import synthesyzer.termination.Termination;
 import synthesyzer.termination.data.team.TeamData;
 import synthesyzer.termination.network.packets.servertoclient.BreakNucleusPacket;
+import synthesyzer.termination.network.packets.servertoclient.PlayerKillPacket;
 import synthesyzer.termination.network.packets.servertoclient.UpdateTeamDataPacket;
 import synthesyzer.termination.network.packets.serializers.TeamDataReader;
 import synthesyzer.termination.network.packets.serializers.TeamDataWriter;
@@ -17,6 +18,7 @@ public class TMNetwork {
     public static void register() {
         PacketBufSerializer.register(TeamData.class, new TeamDataWriter(), new TeamDataReader());
         UpdateTeamDataPacket.register(CHANNEL);
+        PlayerKillPacket.register(CHANNEL);
         CHANNEL.registerClientboundDeferred(BreakNucleusPacket.class);
     }
 
