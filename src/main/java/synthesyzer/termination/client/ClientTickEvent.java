@@ -14,7 +14,7 @@ public class ClientTickEvent {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             tick++;
 
-            // otherwise first multi kill will removed immediately
+            // otherwise first multi kill will be removed immediately
             if (ClientMultiKillData.getTickOfMultiKill() == 0) {
                 return;
             }
