@@ -4,6 +4,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Formatting;
+import synthesyzer.termination.Termination;
 import synthesyzer.termination.client.ClientTeamData;
 import synthesyzer.termination.client.ColorUtil;
 import synthesyzer.termination.data.team.TeamData;
@@ -45,6 +46,10 @@ public class TeamScoreboard {
                 .toList();
 
         for (TeamData teamData : civilizations) {
+            if (teamData.getName() == null) {
+                Termination.LOGGER.info("Team name is null!");
+                continue;
+            }
             Formatting color = player.getScoreboard().getTeam(teamData.getName()).getColor();
             String name = teamData.getName();
             int health = teamData.getHealth();
