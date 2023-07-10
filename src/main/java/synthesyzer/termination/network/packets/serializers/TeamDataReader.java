@@ -8,14 +8,18 @@ public class TeamDataReader implements PacketByteBuf.PacketReader<TeamData> {
     public TeamData apply(PacketByteBuf packetByteBuf) {
         String name = packetByteBuf.readString();
         int health = packetByteBuf.readInt();
-        boolean hasSpawn = packetByteBuf.readBoolean();
-        boolean hasNucleus = packetByteBuf.readBoolean();
 
         TeamData teamData = new TeamData(name);
         teamData.setHealth(health);
+
+        boolean hasSpawn = packetByteBuf.readBoolean();
+
         if (hasSpawn) {
             teamData.setSpawn(packetByteBuf.readBlockPos());
         }
+
+        boolean hasNucleus = packetByteBuf.readBoolean();
+
         if (hasNucleus) {
             teamData.setNucleus(packetByteBuf.readBlockPos());
         }
