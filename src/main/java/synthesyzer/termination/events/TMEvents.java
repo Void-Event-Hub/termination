@@ -11,6 +11,7 @@ public class TMEvents {
         PlayerSpawnEvent.register();
         PlayerDeathEvent.register();
         ServerTickEvent.register();
+        LoadServerEvent.register();
     }
 
 }
