@@ -1,23 +1,38 @@
 package synthesyzer.termination.client;
 
+import io.wispforest.owo.ui.component.Components;
+import io.wispforest.owo.ui.container.Containers;
+import io.wispforest.owo.ui.container.FlowLayout;
+import io.wispforest.owo.ui.core.*;
+import io.wispforest.owo.ui.hud.Hud;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.scoreboard.AbstractTeam;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.explosion.Explosion;
+import synthesyzer.termination.Termination;
 import synthesyzer.termination.client.ui.TeamScoreboard;
 import synthesyzer.termination.data.team.TeamData;
 import synthesyzer.termination.network.TMNetwork;
 import synthesyzer.termination.network.packets.servertoclient.BreakNucleusPacket;
+import synthesyzer.termination.network.packets.servertoclient.UpdateTeamDataPacket;
 import synthesyzer.termination.util.Messenger;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class TerminationClient implements ClientModInitializer {
+
+    private static int hudIteration = 0;
 
     @Override
     public void onInitializeClient() {
@@ -57,6 +72,51 @@ public class TerminationClient implements ClientModInitializer {
                 player.playSound(SoundEvents.BLOCK_AMETHYST_CLUSTER_BREAK, 1.0F, 1.0F);
                 Messenger.sendClientMessage(player, "You are attacking " + attackedTeam.getName() + " ! " + "( " + attackedTeam.getHealth() + " )");
             }
+        }));
+        TMNetwork.CHANNEL.registerClientbound(UpdateTeamDataPacket.class, ((message, access) -> {
+            ClientTeamData.setTeamData(message.teamData());
+            Identifier previousHudId = new Identifier(Termination.MOD_ID, "team_scoreboard_" + hudIteration);
+
+            MinecraftClient client = MinecraftClient.getInstance();
+            PlayerEntity player = client.player;
+
+            if (player == null) {
+                return;
+            }
+
+
+            FlowLayout container = Containers.verticalFlow(Sizing.content(), Sizing.content());
+
+            List<TeamData> teamDatas = new ArrayList<>(ClientTeamData.getTeamData().values());
+            teamDatas.sort((o1, o2) -> Integer.compare(o2.getHealth(), o1.getHealth()));
+
+            for (TeamData teamData : teamDatas) {
+                AbstractTeam team = player.getScoreboard().getTeam(teamData.getName());
+
+                Formatting color = team != null ? team.getColor() : Formatting.WHITE;
+
+                if (teamData.isDead()) {
+                    color = Formatting.DARK_GRAY;
+                }
+
+                container = container.child(
+                        Components.label(
+                                Text.empty().append(teamData.getName())
+                                        .append(" ")
+                                        .append(Text.of(teamData.getHealth() + "/150"))
+                                        .formatted(color != null ? color : Formatting.WHITE)
+                        ).horizontalTextAlignment(HorizontalAlignment.CENTER).shadow(true)
+                );
+            }
+
+            Component finalContainer = container.surface(
+                            Surface.flat(0x77000000)
+                                    .and(Surface.outline(0xFF121212)))
+                    .padding(Insets.of(5))
+                    .positioning(Positioning.relative(100, 40));
+
+            Hud.remove(previousHudId);
+            Hud.add(new Identifier(Termination.MOD_ID, "team_scoreboard_" + ++hudIteration), () -> finalContainer);
         }));
     }
 

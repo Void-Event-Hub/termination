@@ -4,6 +4,7 @@ import net.minecraft.scoreboard.Team;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.command.TeamCommand;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.Formatting;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -36,5 +37,13 @@ public class TeamCommandMixin {
                     new UpdateTeamDataPacket(TeamDataManager.get(world).getTeamData())
             );
         }
+    }
+
+    @Inject(at=@At("TAIL"), method= "executeModifyColor")
+    private static void executeModifyColor(ServerCommandSource source, Team team, Formatting color, CallbackInfoReturnable<Integer> cir) {
+        ServerWorld world = source.getWorld();
+        TMNetwork.CHANNEL.serverHandle(source.getServer()).send(
+                new UpdateTeamDataPacket(TeamDataManager.get(world).getTeamData())
+        );
     }
 }
