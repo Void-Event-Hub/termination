@@ -17,9 +17,9 @@ public class TMNetwork {
 
     public static void register() {
         PacketBufSerializer.register(TeamData.class, new TeamDataWriter(), new TeamDataReader());
-        PlayerKillPacket.register(CHANNEL);
         CHANNEL.registerClientboundDeferred(UpdateTeamDataPacket.class);
         CHANNEL.registerClientboundDeferred(BreakNucleusPacket.class);
+        CHANNEL.registerClientboundDeferred(PlayerKillPacket.class);
     }
 
 }

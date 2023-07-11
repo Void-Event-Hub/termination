@@ -10,6 +10,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.scoreboard.AbstractTeam;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -18,9 +19,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.explosion.Explosion;
 import synthesyzer.termination.Termination;
+import synthesyzer.termination.data.kills.MultiKill;
 import synthesyzer.termination.data.team.TeamData;
 import synthesyzer.termination.network.TMNetwork;
 import synthesyzer.termination.network.packets.servertoclient.BreakNucleusPacket;
+import synthesyzer.termination.network.packets.servertoclient.PlayerKillPacket;
 import synthesyzer.termination.network.packets.servertoclient.UpdateTeamDataPacket;
 import synthesyzer.termination.util.Messenger;
 
@@ -37,39 +40,53 @@ public class TerminationClient implements ClientModInitializer {
         ClientTickEvent.register();
 
         // Server cannot register clientbound packets, so we define the handler here
-        TMNetwork.CHANNEL.registerClientbound(BreakNucleusPacket.class, ((message, access) -> {
-            TeamData attackingTeam = message.attackingTeam();
-            TeamData attackedTeam = message.attackedTeam();
-            PlayerEntity player = access.player();
-            World world = player.getEntityWorld();
+        registerBreakNucleusPacket();
+        registerUpdateTeamPacket();
+        registerPlayerKillPacket();
+    }
 
-            if (attackedTeam.isDead()) {
-                handleTeamDeath(player, world, attackingTeam, attackedTeam);
+    private void registerPlayerKillPacket() {
+        TMNetwork.CHANNEL.registerClientbound(PlayerKillPacket.class, (((message, access) -> {
+            MultiKill multiKill = message.multiKill();
+
+            if (multiKill == MultiKill.SINGLE_KILL) {
                 return;
             }
 
-            if (attackedTeam.getHealth() % 10 == 0) {
-                Messenger.sendMessage(player, attackedTeam.getName() + " is under attack! [ " + attackedTeam.getHealth() + " ]");
+            MinecraftClient client = MinecraftClient.getInstance();
+            PlayerEntity player = client.player;
+
+            if (player != null) {
+                player.playSound(SoundEvents.ENTITY_VEX_DEATH, SoundCategory.MASTER,1.0F, 1.0F);
             }
 
-            spawnBreakParticles(world, attackedTeam.getNucleus().get());
+            ClientMultiKillData.setTickOfMultiKill(ClientTickEvent.getCurrentTick());
 
-            AbstractTeam playerTeam = player.getScoreboardTeam();
+            Hud.add(new Identifier(Termination.MOD_ID, "multi_kill"), () ->
+                    Containers.verticalFlow(Sizing.content(), Sizing.content())
+                            .child(
+                                    Components.label(
+                                                    Text.empty()
+                                                            .append(Text.literal(multiKill.getTitle())
+                                                                    .formatted(getMultiKillFormatting(multiKill), Formatting.BOLD))
+                                            )
+                                            .horizontalTextAlignment(HorizontalAlignment.CENTER).shadow(true)
+                            )
+                            .child(
+                                    Components.label(
+                                                    Text.empty()
+                                                            .append("You killed " + message.victimName() + "!").formatted(Formatting.WHITE)
+                                            )
+                                            .horizontalTextAlignment(HorizontalAlignment.CENTER).shadow(true)
+                            )
+                            .surface(Surface.flat(0x77000000).and(Surface.outline(0xFF121212)))
+                            .padding(Insets.of(5))
+                            .positioning(Positioning.relative(50, 5))
+            );
+        })));
+    }
 
-            if (playerTeam == null) {
-                return;
-            }
-
-            if (playerTeam.getName().equals(attackedTeam.getName())) {
-                player.playSound(SoundEvents.BLOCK_ANVIL_PLACE, 0.7F, 1.0F);
-                Messenger.sendClientMessage(player, "Your civilization is under attack! " + "( " + attackedTeam.getHealth() + " )");
-            }
-
-            if (playerTeam.getName().equals(attackingTeam.getName())) {
-                player.playSound(SoundEvents.BLOCK_AMETHYST_CLUSTER_BREAK, 1.0F, 1.0F);
-                Messenger.sendClientMessage(player, "You are attacking " + attackedTeam.getName() + " ! " + "( " + attackedTeam.getHealth() + " )");
-            }
-        }));
+    private void registerUpdateTeamPacket() {
         TMNetwork.CHANNEL.registerClientbound(UpdateTeamDataPacket.class, ((message, access) -> {
             ClientTeamData.setTeamData(message.teamData());
             Identifier previousHudId = new Identifier(Termination.MOD_ID, "team_scoreboard_" + hudIteration);
@@ -114,6 +131,42 @@ public class TerminationClient implements ClientModInitializer {
 
             Hud.remove(previousHudId);
             Hud.add(new Identifier(Termination.MOD_ID, "team_scoreboard_" + ++hudIteration), () -> finalContainer);
+        }));
+    }
+
+    private void registerBreakNucleusPacket() {
+        TMNetwork.CHANNEL.registerClientbound(BreakNucleusPacket.class, ((message, access) -> {
+            TeamData attackingTeam = message.attackingTeam();
+            TeamData attackedTeam = message.attackedTeam();
+            PlayerEntity player = access.player();
+            World world = player.getEntityWorld();
+
+            if (attackedTeam.isDead()) {
+                handleTeamDeath(player, world, attackingTeam, attackedTeam);
+                return;
+            }
+
+            if (attackedTeam.getHealth() % 10 == 0) {
+                Messenger.sendMessage(player, attackedTeam.getName() + " is under attack! [ " + attackedTeam.getHealth() + " ]");
+            }
+
+            spawnBreakParticles(world, attackedTeam.getNucleus().get());
+
+            AbstractTeam playerTeam = player.getScoreboardTeam();
+
+            if (playerTeam == null) {
+                return;
+            }
+
+            if (playerTeam.getName().equals(attackedTeam.getName())) {
+                player.playSound(SoundEvents.BLOCK_ANVIL_PLACE, 0.7F, 1.0F);
+                Messenger.sendClientMessage(player, "Your civilization is under attack! " + "( " + attackedTeam.getHealth() + " )");
+            }
+
+            if (playerTeam.getName().equals(attackingTeam.getName())) {
+                player.playSound(SoundEvents.BLOCK_AMETHYST_CLUSTER_BREAK, 1.0F, 1.0F);
+                Messenger.sendClientMessage(player, "You are attacking " + attackedTeam.getName() + " ! " + "( " + attackedTeam.getHealth() + " )");
+            }
         }));
     }
 
@@ -174,6 +227,26 @@ public class TerminationClient implements ClientModInitializer {
     private static double rand() {
         Random rand = new Random();
         return (rand.nextDouble() * 2 - 1) / 3.0;
+    }
+
+    private static Formatting getMultiKillFormatting(MultiKill multiKill) {
+        switch (multiKill) {
+            case DOUBLE_KILL -> {
+                return Formatting.YELLOW;
+            }
+            case TRIPLE_KILL -> {
+                return Formatting.RED;
+            }
+            case QUADRA_KILL -> {
+                return Formatting.DARK_RED;
+            }
+            case PENTA_KILL -> {
+                return Formatting.DARK_PURPLE;
+            }
+            default -> {
+                return Formatting.WHITE;
+            }
+        }
     }
 
 }
