@@ -6,7 +6,6 @@ import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.*;
 import io.wispforest.owo.ui.hud.Hud;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleTypes;
@@ -19,7 +18,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.explosion.Explosion;
 import synthesyzer.termination.Termination;
-import synthesyzer.termination.client.ui.TeamScoreboard;
 import synthesyzer.termination.data.team.TeamData;
 import synthesyzer.termination.network.TMNetwork;
 import synthesyzer.termination.network.packets.servertoclient.BreakNucleusPacket;
@@ -36,7 +34,6 @@ public class TerminationClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        HudRenderCallback.EVENT.register(TeamScoreboard::render);
         ClientTickEvent.register();
 
         // Server cannot register clientbound packets, so we define the handler here
