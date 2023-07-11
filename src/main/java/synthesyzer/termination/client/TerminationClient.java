@@ -49,14 +49,11 @@ public class TerminationClient implements ClientModInitializer {
         TMNetwork.CHANNEL.registerClientbound(PlayerKillPacket.class, (((message, access) -> {
             MultiKill multiKill = message.multiKill();
 
-            if (multiKill == MultiKill.SINGLE_KILL) {
-                return;
-            }
 
             MinecraftClient client = MinecraftClient.getInstance();
             PlayerEntity player = client.player;
 
-            if (player != null) {
+            if (player != null && multiKill != MultiKill.SINGLE_KILL) {
                 player.playSound(SoundEvents.ENTITY_VEX_DEATH, SoundCategory.MASTER,1.0F, 1.0F);
             }
 
@@ -67,15 +64,10 @@ public class TerminationClient implements ClientModInitializer {
                             .child(
                                     Components.label(
                                                     Text.empty()
-                                                            .append(Text.literal(multiKill.getTitle())
+                                                            .append(Text.literal(multiKill == MultiKill.SINGLE_KILL ? "" : (multiKill.getTitle() + "\n"))
                                                                     .formatted(getMultiKillFormatting(multiKill), Formatting.BOLD))
-                                            )
-                                            .horizontalTextAlignment(HorizontalAlignment.CENTER).shadow(true)
-                            )
-                            .child(
-                                    Components.label(
-                                                    Text.empty()
-                                                            .append("You killed " + message.victimName() + "!").formatted(Formatting.WHITE)
+                                                            .append(Text.literal("You killed " + message.victimName() + "!")
+                                                                    .formatted(Formatting.WHITE))
                                             )
                                             .horizontalTextAlignment(HorizontalAlignment.CENTER).shadow(true)
                             )
