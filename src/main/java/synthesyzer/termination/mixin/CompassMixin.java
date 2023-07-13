@@ -45,8 +45,6 @@ public abstract class CompassMixin {
                 continue;
             }
 
-            var playerCoord = player.getPos();
-
             if (entity.getScoreboardTeam().equals(player.getScoreboardTeam())) {
                 continue;
             }
@@ -55,7 +53,7 @@ public abstract class CompassMixin {
                 closestPlayer = player;
             }
 
-            if (ourCoord.distanceTo(playerCoord) < ourCoord.distanceTo(closestPlayer.getPos())) {
+            if (ourCoord.distanceTo(player.getPos()) < ourCoord.distanceTo(closestPlayer.getPos())) {
                 closestPlayer = player;
             }
         }
