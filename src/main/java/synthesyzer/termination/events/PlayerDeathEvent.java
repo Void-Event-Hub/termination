@@ -1,6 +1,7 @@
 package synthesyzer.termination.events;
 
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.minecraft.item.Item;
 import net.minecraft.scoreboard.AbstractTeam;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -36,7 +37,7 @@ public class PlayerDeathEvent {
 
                 if (Termination.CONFIG.clearInventoryOnDeath()) {
                     clearInventory(player);
-                    Messenger.sendMessage(player, "Some of your items have been lost, and your tools have taken a beating.");
+                    Messenger.sendMessage(player, "Some of your items have been lost, but thank god tools are indestructible!");
                 }
 
                 if (Termination.CONFIG.playerDeathCooldown() > 0) {
@@ -60,22 +61,15 @@ public class PlayerDeathEvent {
             return;
         }
 
+        for (int i = 0; i < player.getInventory().size(); i++) {
+            if (Math.random() <= chance) {
+                Item item = player.getInventory().getStack(i).getItem();
 
-//        player.inventoryMenu.slots.forEach(slot -> {
-//            if (!slot.hasItem()) {
-//                return;
-//            }
-//
-//            ItemStack item = slot.getItem();
-//
-//            if (item.isDamageableItem()) {
-//                int damage = (int) (item.getMaxDamage() * VoidCivilization.config.damageDealtToToolsOnDeath);
-//                item.hurtAndBreak(damage, player, (playerEntity) -> {
-//                });
-//            } else if (Math.random() <= chance) {
-//                slot.set(ItemStack.EMPTY);
-//            }
-//        });
+                if (!item.isDamageable()) {
+                    player.getInventory().removeStack(i);
+                }
+            }
+        }
     }
 
     private static void announceKill(ServerPlayerEntity killer, ServerPlayerEntity killed) {

@@ -14,7 +14,7 @@ public class MyConfigModel {
     public int damagePerNucleusBreak = 1;
     public int damagePerPlayerDeath = 0;
     public int expAwardedOnPlayerKill = 55;
-    public boolean clearInventoryOnDeath = false;
+    public boolean clearInventoryOnDeath = true;
     public double chanceToDropItemOnDeath = 0.4;
     public double damageDealtToToolsOnDeath = 0.1;
     public int minutesUntilPhase2 = 60;
