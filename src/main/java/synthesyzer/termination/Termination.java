@@ -23,8 +23,6 @@ public class Termination implements ModInitializer {
         TMBlockEntities.register();
         TMCommands.register();
         TMEvents.register();
-
         TMNetwork.register();
-        LOGGER.info("Hello Fabric world!");
     }
 }
