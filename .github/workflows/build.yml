@@ -31,3 +31,4 @@ jobs:
         with:
           artifacts: "build/libs/*"
           token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.event.head_commit.message }}
