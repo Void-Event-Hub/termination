@@ -54,7 +54,7 @@ public class BreakBlockEvent {
                     Messenger.sendMessage(player, "Removed nucleus from " + attackedTeamData.get().getName());
                     return true;
                 } else {
-                    Messenger.sendMessage(player, "You can't break your own nucleus");
+                    Messenger.sendMessage(player, "You can't break your own nucleus.");
                     return false;
                 }
             }
