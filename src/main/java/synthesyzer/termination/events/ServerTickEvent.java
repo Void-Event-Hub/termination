@@ -67,7 +67,7 @@ public class ServerTickEvent {
 
             if (player instanceof ServerPlayerEntity serverPlayer) {
                 if (remainingTicks % 20 == 0) {
-                    Messenger.sendClientMessage(serverPlayer, "You will be revived in " + (remainingTicks / 20) + " seconds.");
+                    Messenger.sendClientMessage(serverPlayer, "§7You will be revived in §6" + (remainingTicks / 20) + " §7seconds.");
                 }
             }
         });
@@ -83,15 +83,26 @@ public class ServerTickEvent {
 
     private static void respawnPlayer(ServerPlayerEntity player) {
         DeathTracker deathTracker = DeathTracker.get(player.world);
-        Messenger.sendClientMessage(player, "You have been revived!");
-        deathTracker.removePlayerDeath(player.getUuid());
+        TeamDataManager teamManager = TeamDataManager.get(player.world);
+        var teamData = teamManager.getTeamData(player.getScoreboardTeam());
 
-        final int ticksPerSecond = 20;
-        BlockPos spawn = getPlayerSpawn(player);
-        player.teleport(spawn.getX(), spawn.getY(), spawn.getZ());
-        player.changeGameMode(GameMode.SURVIVAL);
-        player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 4 * ticksPerSecond, 99));
-        player.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 10 * ticksPerSecond, 1));
+        if (teamData.isEmpty()) {
+            return;
+        }
+
+        if (!teamData.get().isDead()) {
+            Messenger.sendClientMessage(player, "§aYou have been revived!");
+            final int ticksPerSecond = 20;
+            BlockPos spawn = getPlayerSpawn(player);
+            player.teleport(spawn.getX(), spawn.getY(), spawn.getZ());
+            player.changeGameMode(GameMode.SURVIVAL);
+            player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 4 * ticksPerSecond, 99));
+            player.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 10 * ticksPerSecond, 1));
+        } else {
+            Messenger.sendMessage(player, "§4Game over!");
+        }
+
+        deathTracker.removePlayerDeath(player.getUuid());
     }
 
     private static BlockPos getPlayerSpawn(ServerPlayerEntity player) {

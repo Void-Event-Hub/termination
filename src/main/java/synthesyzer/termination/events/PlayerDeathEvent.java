@@ -31,13 +31,15 @@ public class PlayerDeathEvent {
                         awardKiller(killer);
                         announceKill(killer, player);
                     }
+                } else {
+                    world.getPlayers().forEach(p -> Messenger.sendMessage(p, "§8" + player.getDisplayName().getString() + " §7died!"));
                 }
 
-                Messenger.sendClientMessage(player, "You have died!");
+                Messenger.sendClientMessage(player, "§4You have died!");
 
                 if (Termination.CONFIG.clearInventoryOnDeath()) {
                     clearInventory(player);
-                    Messenger.sendMessage(player, "Some of your items have been lost, but thank god tools are indestructible!");
+                    Messenger.sendMessage(player, "§7Some of your items have been lost. luckily tools are indestructible!");
                 }
 
                 if (Termination.CONFIG.playerDeathCooldown() > 0) {
@@ -76,8 +78,8 @@ public class PlayerDeathEvent {
         ServerWorld world = killer.getWorld();
         MultiKill multiKill = MultiKillManager.addKill(killer.getGameProfile().getId(), ServerTickEvent.getCurrentTick());
         TMNetwork.CHANNEL.serverHandle(killer).send(new PlayerKillPacket(multiKill, killed.getGameProfile().getName()));
-        String multiKillTitle = multiKill == MultiKill.SINGLE_KILL ? "" : "[" + multiKill.getTitle() + "] ";
-        String message = multiKillTitle + killer.getDisplayName().getString() + " has killed " + killed.getDisplayName().getString() + "!";
+        String multiKillTitle = multiKill == MultiKill.SINGLE_KILL ? "" : "§7[§3" + multiKill.getTitle() + "§7] ";
+        String message = multiKillTitle + "§8"+ killer.getDisplayName().getString() + "§7 has killed §8" + killed.getDisplayName().getString() + "§7!";
 
         world.getPlayers().forEach(player -> Messenger.sendMessage(player, message));
     }
